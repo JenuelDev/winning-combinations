@@ -108,6 +108,21 @@ async function copyCombination(num: string) {
                         </div>
                     </div>
                 </div>
+
+                <div class="flex flex-col items-center mt-5">
+                    <div class="mb-3">
+                        <strong>Note:</strong> If you won a lottery, and want to thank me for the
+                        <br />
+                        help. You can buy me a coffee by clicking the button below.
+                    </div>
+                    <a
+                        href="https://buymeacoffee.com/jenuel.dev"
+                        class="bg-orange-600 p-2 rounded-md flex items-center gap-2 cursor-pointer border-none text-white decoration-none px-2 hover:px-3 transition-all hover:underline hover:text-lg"
+                    >
+                        Send a Coffee
+                        <Icon icon="material-symbols:coffee" class="text-2xl" />
+                    </a>
+                </div>
             </div>
         </div>
     </div>
