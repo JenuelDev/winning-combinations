@@ -1,69 +1,35 @@
 import random
 
-def generate_winning_combination(number_of_combinations: int, max_number: int) -> list[int]:
-    numbers = []
-    while len(numbers) < number_of_combinations:
-        num = random.randint(1, max_number)
-        if num not in numbers:
-            numbers.append(num)
-    return numbers
+def generate_sorted_combination(n: int, max_n: int) -> tuple[int]:
+    return tuple(sorted(random.sample(range(1, max_n + 1), n)))
 
-def emulate_dynamic_combinations():
-    number_of_combinations = 6
-    max_number = 58
-
-    
-
+def emulate_dynamic_combinations(numberCountPerCombination: int = 6, maxNumber: int = 58, numberOfCombinationToGenerate: int = 1, randomWinningCombination: bool = False):
     count = 0
     print("---------------------------------")
     print("Rolling The Numbers ....")
 
+    # Pre-generate winning combinations
+    if not randomWinningCombination:
+        winning_combinations = {generate_sorted_combination(numberCountPerCombination, maxNumber) for _ in range(numberOfCombinationToGenerate)}
+
     while True:
-        winning_combination1 = generate_winning_combination(number_of_combinations, max_number)
-        winning_combination1.sort()
-        
-
-        winning_combination2 = generate_winning_combination(number_of_combinations, max_number)
-        winning_combination2.sort()
-        
-
-        winning_combination3 = generate_winning_combination(number_of_combinations, max_number)
-        winning_combination3.sort()
-        
-
-        winning_combination4 = generate_winning_combination(number_of_combinations, max_number)
-        winning_combination4.sort()
+        if randomWinningCombination:
+            winning_combinations = {generate_sorted_combination(numberCountPerCombination, maxNumber) for _ in range(numberOfCombinationToGenerate)}
 
         count += 1
-        
-        lottery_role_combination = generate_winning_combination(number_of_combinations, max_number)
-        
-        lottery_role_combination.sort()
-        
+        lottery_combination = generate_sorted_combination(numberCountPerCombination, maxNumber)
 
-        if winning_combination1 == lottery_role_combination or winning_combination2 == lottery_role_combination or winning_combination3 == lottery_role_combination or winning_combination4 == lottery_role_combination:
+        if lottery_combination in winning_combinations:
             print("Combinations:")
-            print(" - ".join(str(num) for num in winning_combination1))
-            print(" - ".join(str(num) for num in winning_combination2))
-            print(" - ".join(str(num) for num in winning_combination3))
-            print(" - ".join(str(num) for num in winning_combination4))
-            print()
-            print("Winning combination:")
-            print(" - ".join(str(num) for num in lottery_role_combination))
+            for comb in winning_combinations:
+                print(" - ".join(map(str, comb)))
+            print("\nWinning combination:")
+            print(" - ".join(map(str, lottery_combination)))
             print(f"Role Times: {count}")
             print("WINNER WINNER CHICKEN DINNER!")
-            print("---------------------------------")
-            print()
-            print()
+            print("---------------------------------\n")
             break
 
 # Run the simulation
-count = 0
-maxCombination = 100
-while True:
-    count += 1
-    emulate_dynamic_combinations()
-
-    if count == maxCombination:
-        break
-    
+for _ in range(100):
+    emulate_dynamic_combinations(6, 49, 12, False)
