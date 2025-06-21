@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Icon } from "@iconify/vue";
+import { generateWinningCombination } from "./util/winning-combination";
+import { emulateDynamicCombinations } from "./../tests/emulate-dynamic-combinations.test";
 
 const numberOfCombinations = ref(6);
 const toMaxNumber = ref(58);
@@ -9,16 +11,7 @@ const generatedNumbers = ref<Array<number[]>>([]);
 
 function getRandomNumbers(count: number, max: number) {
     for (let i = 0; i < numberToGenerate.value; i++) {
-        const numbers: number[] = [];
-
-        while (numbers.length < count) {
-            const num = Math.floor(Math.random() * max) + 1;
-            if (!numbers.includes(num)) {
-                numbers.push(num);
-            }
-        }
-
-        generatedNumbers.value.push(numbers);
+        generatedNumbers.value.push(generateWinningCombination(count, max));
     }
 }
 
@@ -122,6 +115,7 @@ async function copyCombination(num: string) {
                         Send a Coffee
                         <Icon icon="material-symbols:coffee" class="text-2xl" />
                     </a>
+                    <button @click="emulateDynamicCombinations()"></button>
                 </div>
             </div>
         </div>
