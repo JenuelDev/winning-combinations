@@ -4,26 +4,50 @@ from typing import Tuple
 def generate_sorted_combination(n: int, max_n: int) -> Tuple[int, ...]:
     return tuple(sorted(random.sample(range(1, max_n + 1), n)))
 
-def emulate_dynamic_combinations(numberCountPerCombination: int = 6, maxNumber: int = 58, numberOfCombinationToGenerate: int = 1, randomWinningCombination: bool = False, withRandom: bool = False, numberOfRandomCombinations: int = 1):
+def emulate_dynamic_combinations(
+    numberCountPerCombination: int = 6,
+    maxNumber: int = 58,
+    numberOfCombinationToGenerate: int = 1,
+    randomWinningCombination: bool = False,
+    withRandom: bool = False,
+    numberOfRandomCombinations: int = 1
+):
     count = 0
-    print("---------------------------------")
-    print("Rolling The Numbers ....")
+    gen_comb = generate_sorted_combination
 
-    # Pre-generate winning combinations
+    # Pre-generate combinations if not regenerating each time
+    winning_combinations = None
     if not randomWinningCombination:
-        winning_combinations = {generate_sorted_combination(numberCountPerCombination, maxNumber) for _ in range(numberOfCombinationToGenerate)}
+        winning_combinations = {
+            gen_comb(numberCountPerCombination, maxNumber)
+            for _ in range(numberOfCombinationToGenerate)
+        }
+
+    random_combinations = None
+    if withRandom and not randomWinningCombination:
+        random_combinations = {
+            gen_comb(numberCountPerCombination, maxNumber)
+            for _ in range(numberOfRandomCombinations)
+        }
 
     while True:
         if randomWinningCombination:
-            winning_combinations = {generate_sorted_combination(numberCountPerCombination, maxNumber) for _ in range(numberOfCombinationToGenerate)}
+            winning_combinations = {
+                gen_comb(numberCountPerCombination, maxNumber)
+                for _ in range(numberOfCombinationToGenerate)
+            }
 
-        if withRandom:
-            randomCombination = {generate_sorted_combination(numberCountPerCombination, maxNumber) for _ in range(numberOfRandomCombinations)}
+        if withRandom and randomWinningCombination:
+            random_combinations = {
+                gen_comb(numberCountPerCombination, maxNumber)
+                for _ in range(numberOfRandomCombinations)
+            }
 
         count += 1
-        lottery_combination = generate_sorted_combination(numberCountPerCombination, maxNumber)
+        draw = gen_comb(numberCountPerCombination, maxNumber)
 
-        if lottery_combination in winning_combinations or (withRandom and lottery_combination in randomCombination):
+        if draw in winning_combinations or (withRandom and draw in random_combinations):
+            # Print results after match
             print("---------------------------------")
             print("Combinations:")
             for comb in winning_combinations:
@@ -31,16 +55,23 @@ def emulate_dynamic_combinations(numberCountPerCombination: int = 6, maxNumber: 
             
             if withRandom:
                 print("Random Combinations:")
-                for comb in randomCombination:
+                for comb in random_combinations:
                     print(" - ".join(map(str, comb)))
 
             print("\nWinning combination:")
-            print(" - ".join(map(str, lottery_combination)))
-            print(f"Role Times: {count}")
+            print(" - ".join(map(str, draw)))
+            print(f"Roll Times: {count}")
             print("WINNER WINNER CHICKEN DINNER!")
             print("---------------------------------\n")
             break
 
 # Run the simulation
 for _ in range(100):
-    emulate_dynamic_combinations(6, 49, 6, randomWinningCombination=False, withRandom=True, numberOfRandomCombinations=6)
+    emulate_dynamic_combinations(
+        numberCountPerCombination=6,
+        maxNumber=49,
+        numberOfCombinationToGenerate=6,
+        randomWinningCombination=True,
+        withRandom=True,
+        numberOfRandomCombinations=6
+    )
