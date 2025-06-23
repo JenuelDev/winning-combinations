@@ -49,7 +49,10 @@ def emulate_dynamic_combinations(
         if draw in winning_combinations or (withRandom and draw in random_combinations):
             # Print results after match
             print("---------------------------------")
-            print("Combinations:")
+            if randomWinningCombination:
+                print("Random Combinations:")
+            else:
+                print("Combinations:")
             for comb in winning_combinations:
                 print(" - ".join(map(str, comb)))
             
@@ -65,13 +68,4 @@ def emulate_dynamic_combinations(
             print("---------------------------------\n")
             break
 
-# Run the simulation
-for _ in range(100):
-    emulate_dynamic_combinations(
-        numberCountPerCombination=6,
-        maxNumber=49,
-        numberOfCombinationToGenerate=6,
-        randomWinningCombination=True,
-        withRandom=True,
-        numberOfRandomCombinations=6
-    )
+
