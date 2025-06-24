@@ -10,7 +10,9 @@ def emulate_dynamic_combinations(
     numberOfCombinationToGenerate: int = 1,
     randomWinningCombination: bool = False,
     withRandom: bool = False,
-    numberOfRandomCombinations: int = 1
+    numberOfRandomCombinations: int = 1,
+    breakAfterLoop: int = 0,
+    printOnlyIfWon: bool = False
 ):
     count = 0
     gen_comb = generate_sorted_combination
@@ -66,6 +68,29 @@ def emulate_dynamic_combinations(
             print(f"Roll Times: {count}")
             print("WINNER WINNER CHICKEN DINNER!")
             print("---------------------------------\n")
+            break
+
+        if breakAfterLoop > 0 and count >= breakAfterLoop:
+            if not printOnlyIfWon:
+                print("---------------------------------")
+                print(f"Roll Times: {count}")
+                if randomWinningCombination:
+                    print("Random Combinations:")
+                else:
+                    print("Combinations:")
+                for comb in winning_combinations:
+                    print(" - ".join(map(str, comb)))
+                
+                if withRandom:
+                    print("Random Combinations:")
+                    for comb in random_combinations:
+                        print(" - ".join(map(str, comb)))
+                
+                print(f"Roll Times: {count}")
+                print("NOTHING WON!")
+                print("---------------------------------\n")
+            else:
+                print(f"NOTHING WON!")
             break
 
 

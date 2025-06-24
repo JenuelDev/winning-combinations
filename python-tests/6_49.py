@@ -6,7 +6,9 @@ for _ in range(100):
         numberCountPerCombination=6,
         maxNumber=49,
         numberOfCombinationToGenerate=6,
-        randomWinningCombination=False,
+        randomWinningCombination=True,
         withRandom=True,
-        numberOfRandomCombinations=12
+        numberOfRandomCombinations=12,
+        breakAfterLoop=5000,
+        printOnlyIfWon=True
     )
