@@ -4,9 +4,11 @@ from winning_combination_runner import emulate_dynamic_combinations
 for _ in range(1):
     emulate_dynamic_combinations(
         numberCountPerCombination=6,
-        maxNumber=42,
+        maxNumber=58,
         numberOfCombinationToGenerate=18,
-        randomWinningCombination=True,
+        randomWinningCombination=False,
         # withRandom=True,
-        # numberOfRandomCombinations=6
+        # numberOfRandomCombinations=12,
+        # breakAfterLoop=5000,
+        # printOnlyIfWon=True
     )
