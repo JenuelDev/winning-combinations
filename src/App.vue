@@ -44,17 +44,22 @@ async function copyCombination(num: string) {
                 <div class="flex flex-col text-left">
                     <small for="">Number of Digits</small>
                     <input type="number" v-model="numberOfCombinations"
-                        class="p-2 rounded-md border-gray-9 focus:border-indigo-6" />
+                        class="p-2 rounded-md border-gray-9 focus:border-indigo-6 max-w-100px" />
                 </div>
                 <div class="flex flex-col text-left">
-                    <small for="">Max Number</small>
-                    <input type="number" v-model="toMaxNumber"
-                        class="p-2 rounded-md border-gray-9 focus:border-indigo-6" />
+                    <small for=""> Enter The Max Number </small>
+                    <div class="flex items-center">
+                        <div class="bg-gray-400 p-2 rounded-tl-md rounded-bl-md color-white w-30px ">
+                            1 to
+                        </div>
+                        <input type="number" v-model="toMaxNumber"
+                            class="p-2 rounded-tr-md rounded-br-md border-gray-9 focus:border-indigo-6 max-w-50px" />
+                    </div>
                 </div>
                 <div class="flex flex-col text-left">
-                    <small for="">How Many Combinations?</small>
+                    <small for="">Number to Generate</small>
                     <input type="number" v-model="numberToGenerate"
-                        class="p-2 rounded-md border-gray-9 focus:border-indigo-6" />
+                        class="p-2 rounded-md border-gray-9 focus:border-indigo-6 max-w-100px" />
                 </div>
             </div>
             <div class="mt-10 flex items-center justify-center gap-x-6 pb-5">
