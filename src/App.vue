@@ -2,15 +2,22 @@
 import { ref } from "vue";
 import { Icon } from "@iconify/vue";
 import { generateWinningCombination } from "./util/winning-combination";
+import IncludeNumberModal from "./components/IncludeNumberModal.vue";
+import { NButton, NPopconfirm } from "naive-ui";
+import ExcludeNumberModal from "./components/ExcludeNumberModal.vue";
 
+const includeNumberModalRef = ref<InstanceType<typeof IncludeNumberModal> | null>(null);
+const excludeNumberModalRef = ref<InstanceType<typeof ExcludeNumberModal> | null>(null);
 const numberOfCombinations = ref(6);
 const toMaxNumber = ref(58);
 const numberToGenerate = ref(1);
 const generatedNumbers = ref<Array<number[]>>([]);
+const includeNumbers = ref<number[]>([]);
+const excludeNumbers = ref<number[]>([]);
 
 function getRandomNumbers(count: number, max: number) {
     for (let i = 0; i < numberToGenerate.value; i++) {
-        generatedNumbers.value.push(generateWinningCombination(count, max));
+        generatedNumbers.value.push(generateWinningCombination(count, max, includeNumbers.value, excludeNumbers.value));
     }
 }
 
@@ -29,7 +36,7 @@ async function copyCombination(num: string) {
 </script>
 
 <template>
-    <div class="mx-auto max-w-2xl flex items-center justify-center min-h-100vh">
+    <div class="mx-auto max-w-2xl flex items-center justify-center min-h-100vh py-20">
         <div class="text-center">
             <h1 class="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-6xl">
                 Winning Combinations For Lottery
@@ -40,7 +47,7 @@ async function copyCombination(num: string) {
                 spend what you’re comfortable letting go, and avoid playing unless you're absolutely
                 sure about your decision.
             </p>
-            <div class="flex gap-5 justify-center flex-wrap">
+            <div class="flex gap-5 justify-center flex-wrap mb-5">
                 <div class="flex flex-col text-left">
                     <small for="">Number of Digits</small>
                     <input type="number" v-model="numberOfCombinations"
@@ -60,6 +67,62 @@ async function copyCombination(num: string) {
                     <small for="">Number to Generate</small>
                     <input type="number" v-model="numberToGenerate"
                         class="p-2 rounded-md border-gray-9 focus:border-indigo-6 max-w-100px" />
+                </div>
+            </div>
+            <div>
+                <div class="mb-5">
+                    <div> Include Numbers: <NButton size="tiny" @click="includeNumbers = []">
+                            <template #icon>
+                                <Icon icon="carbon:reset-alt" />
+                            </template>
+                            Reset
+                        </NButton>
+                    </div>
+                    <div class="flex gap-2 justify-center">
+                        <template v-for="(num, i) in includeNumbers" :key="i">
+                            <NPopconfirm @positive-click="includeNumbers.splice(i, 1)">
+                                <template #trigger>
+                                    <div
+                                        class="bg-green-2 h-30px w-30px rounded-full flex items-center justify-center relative cursor-pointer">
+                                        {{ num }}
+                                    </div>
+                                </template>
+                                Remove Number?
+                            </NPopconfirm>
+                        </template>
+                        <div
+                            class="bg-gray-2 h-30px w-30px rounded-full flex items-center justify-center relative cursor-pointer">
+                            <Icon icon="material-symbols:add" class="text-2xl"
+                                @click="includeNumberModalRef?.toggleModal()" />
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div>Exclude Numbers: <NButton size="tiny" @click="excludeNumbers = []">
+                            <template #icon>
+                                <Icon icon="carbon:reset-alt" />
+                            </template>
+                            Reset
+                        </NButton>
+                    </div>
+                    <div class="flex gap-2 justify-center">
+                        <template v-for="(num, i) in excludeNumbers" :key="i">
+                            <NPopconfirm @positive-click="excludeNumbers.splice(i, 1)">
+                                <template #trigger>
+                                    <div
+                                        class="bg-red-2 h-30px w-30px rounded-full flex items-center justify-center relative cursor-pointer">
+                                        {{ num }}
+                                    </div>
+                                </template>
+                                Remove Number?
+                            </NPopconfirm>
+                        </template>
+                        <div
+                            class="bg-gray-2 h-30px w-30px rounded-full flex items-center justify-center relative cursor-pointer">
+                            <Icon icon="material-symbols:add" class="text-2xl"
+                                @click="excludeNumberModalRef?.toggleModal()" />
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="mt-10 flex items-center justify-center gap-x-6 pb-5">
@@ -105,5 +168,13 @@ async function copyCombination(num: string) {
                 </a>
             </div>
         </div>
+        <IncludeNumberModal ref="includeNumberModalRef" @include="(number) => {
+            includeNumbers.push(number)
+            excludeNumbers = excludeNumbers.filter((num) => num !== number)
+        }" :max="toMaxNumber" />
+        <ExcludeNumberModal ref="excludeNumberModalRef" @include="(number) => {
+            excludeNumbers.push(number)
+            includeNumbers = includeNumbers.filter((num) => num !== number)
+        }" :max="toMaxNumber" />
     </div>
 </template>
