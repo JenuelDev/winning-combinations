@@ -12,7 +12,8 @@ def emulate_dynamic_combinations(
     withRandom: bool = False,
     numberOfRandomCombinations: int = 1,
     breakAfterLoop: int = 0,
-    printOnlyIfWon: bool = False
+    printOnlyIfWon: bool = False,
+    runs: int = 0
 ):
     count = 0
     gen_comb = generate_sorted_combination
@@ -91,6 +92,9 @@ def emulate_dynamic_combinations(
                 print("---------------------------------\n")
             else:
                 print(f"NOTHING WON!")
+            break
+
+        if runs > 0 and runs == count:
             break
 
 

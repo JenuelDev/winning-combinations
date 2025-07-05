@@ -5,7 +5,9 @@ import { generateWinningCombination } from "./util/winning-combination";
 import IncludeNumberModal from "./components/IncludeNumberModal.vue";
 import { NButton, NPopconfirm } from "naive-ui";
 import ExcludeNumberModal from "./components/ExcludeNumberModal.vue";
+import AtleastHasNumberModal from "./components/AtleastHasNumberModal.vue";
 
+const atleastHasNumberModalRef = ref<InstanceType<typeof AtleastHasNumberModal> | null>(null);
 const includeNumberModalRef = ref<InstanceType<typeof IncludeNumberModal> | null>(null);
 const excludeNumberModalRef = ref<InstanceType<typeof ExcludeNumberModal> | null>(null);
 const numberOfCombinations = ref(6);
@@ -14,10 +16,11 @@ const numberToGenerate = ref(1);
 const generatedNumbers = ref<Array<number[]>>([]);
 const includeNumbers = ref<number[]>([]);
 const excludeNumbers = ref<number[]>([]);
+const atleastHasNumbers = ref<number[]>([]);
 
 function getRandomNumbers(count: number, max: number) {
     for (let i = 0; i < numberToGenerate.value; i++) {
-        generatedNumbers.value.push(generateWinningCombination(count, max, includeNumbers.value, excludeNumbers.value));
+        generatedNumbers.value.push(generateWinningCombination(count, max, includeNumbers.value, excludeNumbers.value, atleastHasNumbers.value));
     }
 }
 
@@ -124,6 +127,33 @@ async function copyCombination(num: string) {
                         </div>
                     </div>
                 </div>
+                <div>
+                    <div>Atleast Has One of This Numbers: <NButton size="tiny" @click="atleastHasNumbers = []">
+                            <template #icon>
+                                <Icon icon="carbon:reset-alt" />
+                            </template>
+                            Reset
+                        </NButton>
+                    </div>
+                    <div class="flex gap-2 justify-center">
+                        <template v-for="(num, i) in atleastHasNumbers" :key="i">
+                            <NPopconfirm @positive-click="atleastHasNumbers.splice(i, 1)">
+                                <template #trigger>
+                                    <div
+                                        class="bg-purple-2 h-30px w-30px rounded-full flex items-center justify-center relative cursor-pointer">
+                                        {{ num }}
+                                    </div>
+                                </template>
+                                Remove Number?
+                            </NPopconfirm>
+                        </template>
+                        <div
+                            class="bg-gray-2 h-30px w-30px rounded-full flex items-center justify-center relative cursor-pointer">
+                            <Icon icon="material-symbols:add" class="text-2xl"
+                                @click="atleastHasNumberModalRef?.toggleModal()" />
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="mt-10 flex items-center justify-center gap-x-6 pb-5">
                 <button
@@ -174,6 +204,10 @@ async function copyCombination(num: string) {
         }" :max="toMaxNumber" />
         <ExcludeNumberModal ref="excludeNumberModalRef" @include="(number) => {
             excludeNumbers.push(number)
+            includeNumbers = includeNumbers.filter((num) => num !== number)
+        }" :max="toMaxNumber" />
+        <AtleastHasNumberModal ref="atleastHasNumberModalRef" @include="(number) => {
+            atleastHasNumbers.push(number)
             includeNumbers = includeNumbers.filter((num) => num !== number)
         }" :max="toMaxNumber" />
     </div>
