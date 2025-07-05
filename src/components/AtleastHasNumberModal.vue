@@ -31,7 +31,7 @@ defineExpose({
 
 <template>
     <NModal v-model:show="showModal">
-        <NCard class="w-200px" title="Include Number">
+        <NCard class="w-200px" title="Add Number">
             <form @submit.prevent="handleSubmit">
                 <NInputNumber v-model:value="value" :max="max" :min="1" />
                 <small>Press Enter</small>
