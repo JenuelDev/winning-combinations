@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { Icon } from "@iconify/vue";
 import { generateWinningCombination } from "./util/winning-combination";
 import IncludeNumberModal from "./components/IncludeNumberModal.vue";
 import { NButton, NPopconfirm } from "naive-ui";
 import ExcludeNumberModal from "./components/ExcludeNumberModal.vue";
 import AtleastHasNumberModal from "./components/AtleastHasNumberModal.vue";
+import ChooseWinningLottery from "./components/ChooseWinningLottery.vue";
+import UltraLotto658 from "@/assets/images/ultra-lotto-6-58.png";
 
 const atleastHasNumberModalRef = ref<InstanceType<typeof AtleastHasNumberModal> | null>(null);
 const includeNumberModalRef = ref<InstanceType<typeof IncludeNumberModal> | null>(null);
@@ -17,6 +19,20 @@ const generatedNumbers = ref<Array<number[]>>([]);
 const includeNumbers = ref<number[]>([]);
 const excludeNumbers = ref<number[]>([]);
 const atleastHasNumbers = ref<number[]>([]);
+const selectedLottery = ref({
+    label: "Ultra Lotto 6/58",
+    key: "ultra_lotto_6_58",
+    img: UltraLotto658,
+    number_of_digits: 6,
+    max_number: 58
+});
+
+watch(() => selectedLottery.value, (newVal) => {
+    numberOfCombinations.value = newVal.number_of_digits;
+    toMaxNumber.value = newVal.max_number;
+}, {
+    deep: true
+});
 
 function getRandomNumbers(count: number, max: number) {
     for (let i = 0; i < numberToGenerate.value; i++) {
@@ -39,9 +55,9 @@ async function copyCombination(num: string) {
 </script>
 
 <template>
-    <div class="mx-auto max-w-2xl flex items-center justify-center min-h-100vh py-20">
+    <div class="mx-auto max-w-3xl flex items-center justify-center min-h-100vh py-20">
         <div class="text-center">
-            <h1 class="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-6xl">
+            <h1 class="text-3xl font-bold tracking-tight text-balance text-gray-900 sm:text-6xl">
                 Winning Combinations For Lottery
             </h1>
             <p class="mt-8 text-lg font-medium text-pretty text-gray-500 sm:text-xl/8">
@@ -50,29 +66,25 @@ async function copyCombination(num: string) {
                 spend what you’re comfortable letting go, and avoid playing unless you're absolutely
                 sure about your decision.
             </p>
-            <div class="flex gap-5 justify-center flex-wrap mb-5">
-                <div class="flex flex-col text-left">
-                    <small for="">Number of Digits</small>
-                    <input type="number" v-model="numberOfCombinations"
-                        class="p-2 rounded-md border-gray-9 focus:border-indigo-6 max-w-100px" />
-                </div>
-                <div class="flex flex-col text-left">
-                    <small for=""> Enter The Max Number </small>
-                    <div class="flex items-center">
-                        <div class="bg-gray-400 p-2 rounded-tl-md rounded-bl-md color-white w-30px ">
-                            1 to
-                        </div>
-                        <input type="number" v-model="toMaxNumber"
-                            class="p-2 rounded-tr-md rounded-br-md border-gray-9 focus:border-indigo-6 max-w-50px" />
-                    </div>
-                </div>
-                <div class="flex flex-col text-left">
-                    <small for="">Number to Generate</small>
-                    <input type="number" v-model="numberToGenerate"
-                        class="p-2 rounded-md border-gray-9 focus:border-indigo-6 max-w-100px" />
-                </div>
+            <div>
+                <h3>Choose Winning Lottery</h3>
+                <ChooseWinningLottery v-model="selectedLottery" />
             </div>
             <div>
+                <h3>Set Parameters</h3>
+                <div class="flex justify-center mb-5 text-center">
+                    <di>
+                        <div> How Many Combinations: <NButton size="tiny" @click="numberToGenerate = 1">
+                                <template #icon>
+                                    <Icon icon="carbon:reset-alt" />
+                                </template>
+                                Reset
+                            </NButton>
+                        </div>
+                        <input type="number" v-model="numberToGenerate"
+                            class="p-2 rounded-md border-gray-9 focus:border-indigo-6 max-w-150px" />
+                    </di>
+                </div>
                 <div class="mb-5">
                     <div> Include Numbers: <NButton size="tiny" @click="includeNumbers = []">
                             <template #icon>
@@ -100,7 +112,7 @@ async function copyCombination(num: string) {
                         </div>
                     </div>
                 </div>
-                <div>
+                <div class="mb-5">
                     <div>Exclude Numbers: <NButton size="tiny" @click="excludeNumbers = []">
                             <template #icon>
                                 <Icon icon="carbon:reset-alt" />
