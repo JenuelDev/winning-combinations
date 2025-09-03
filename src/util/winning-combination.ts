@@ -1,3 +1,22 @@
+// Utility: secure random int between min (inclusive) and max (exclusive)
+function secureRandomInt(min: number, max: number): number {
+    const range = max - min;
+    if (range <= 0) throw new Error("Invalid range");
+
+    const randomBuffer = new Uint32Array(1);
+    let randomValue: number;
+
+    // Rejection sampling to avoid modulo bias
+    const maxUnbiased = Math.floor(0xffffffff / range) * range;
+
+    do {
+        crypto.getRandomValues(randomBuffer);
+        randomValue = randomBuffer[0];
+    } while (randomValue >= maxUnbiased);
+
+    return min + (randomValue % range);
+}
+
 export function generateWinningCombination(
     numberOfCombinations: number,
     maxNumber: number,
@@ -7,34 +26,29 @@ export function generateWinningCombination(
 ): number[] {
     const result = [...include];
 
-    // Validate input
     if (include.length > numberOfCombinations) {
         throw new Error("Include array has more numbers than numberOfCombinations.");
     }
 
-    // Build the pool excluding 'exclude' and 'include' values
     let pool = Array.from({ length: maxNumber }, (_, i) => i + 1)
         .filter(num => !exclude.includes(num) && !include.includes(num));
 
-    // Shuffle pool using Fisher–Yates
+    // Fisher–Yates shuffle with secure random
     for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = secureRandomInt(0, i + 1);
         [pool[i], pool[j]] = [pool[j], pool[i]];
     }
 
-    // Ensure at least one number from 'hasAtLeastOneOfThisNumbers' is included
     const availableFromHasList = hasAtLeastOneOfThisNumbers
         .filter(num => !exclude.includes(num) && !include.includes(num) && pool.includes(num));
 
     const alreadyIncluded = result.some(num => hasAtLeastOneOfThisNumbers.includes(num));
     if (!alreadyIncluded && availableFromHasList.length > 0) {
-        const chosen = availableFromHasList[Math.floor(Math.random() * availableFromHasList.length)];
+        const chosen = availableFromHasList[secureRandomInt(0, availableFromHasList.length)];
         result.push(chosen);
-        // Remove chosen from pool
         pool = pool.filter(num => num !== chosen);
     }
 
-    // Add random numbers until reaching numberOfCombinations
     while (result.length < numberOfCombinations && pool.length > 0) {
         result.push(pool.pop()!);
     }

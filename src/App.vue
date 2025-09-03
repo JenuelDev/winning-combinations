@@ -73,7 +73,7 @@ async function copyCombination(num: string) {
             <div>
                 <h3>Set Parameters</h3>
                 <div class="flex justify-center mb-5 text-center">
-                    <di>
+                    <div>
                         <div> How Many Combinations: <NButton size="tiny" @click="numberToGenerate = 1">
                                 <template #icon>
                                     <Icon icon="carbon:reset-alt" />
@@ -83,7 +83,7 @@ async function copyCombination(num: string) {
                         </div>
                         <input type="number" v-model="numberToGenerate"
                             class="p-2 rounded-md border-gray-9 focus:border-indigo-6 max-w-150px" />
-                    </di>
+                    </div>
                 </div>
                 <div class="mb-5">
                     <div> Include Numbers: <NButton size="tiny" @click="includeNumbers = []">
