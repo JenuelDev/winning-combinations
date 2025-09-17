@@ -1,8 +1,12 @@
-import random
+import secrets
 from typing import Tuple
 
 def generate_sorted_combination(n: int, max_n: int) -> Tuple[int, ...]:
-    return tuple(sorted(random.sample(range(1, max_n + 1), n)))
+    # Use secrets for secure randomness
+    numbers = set()
+    while len(numbers) < n:
+        numbers.add(secrets.randbelow(max_n) + 1)
+    return tuple(sorted(numbers))
 
 def emulate_dynamic_combinations(
     numberCountPerCombination: int = 6,
@@ -96,5 +100,3 @@ def emulate_dynamic_combinations(
 
         if runs > 0 and runs == count:
             break
-
-
