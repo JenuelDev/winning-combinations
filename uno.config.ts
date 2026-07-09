@@ -1,16 +1,10 @@
 import { defineConfig } from 'unocss'
 import presetMini from '@unocss/preset-mini'
-import presetWebFonts from '@unocss/preset-web-fonts'
 
+// Web fonts preset removed: the UI now uses a native system font stack
+// (see main.scss) so there is no render-blocking external font request.
 export default defineConfig({
     presets: [
         presetMini(),
-        presetWebFonts({
-            provider: 'google', // default provider
-            fonts: {
-                // these will extend the default theme
-                sans: 'Roboto',
-            },
-        })
     ],
 })
