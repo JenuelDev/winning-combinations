@@ -3,19 +3,86 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import { generateWinningCombination } from "./util/winning-combination";
 import NumberModal from "./components/NumberModal.vue";
 import ChooseWinningLottery from "./components/ChooseWinningLottery.vue";
-import UltraLotto658 from "@/assets/images/ultra-lotto-6-58.webp";
+import { defaultLottery, findLotteryOption } from "@/config/lotteries";
+
+const STORAGE_KEY = "winning-combinations:parameters:v1";
+const DEFAULT_COMBINATION_COUNT = 6;
+
+interface StoredParameters {
+    selectedLotteryKey: string;
+    numberToGenerate: number;
+    includeNumbers: number[];
+    excludeNumbers: number[];
+    atleastHasNumbers: number[];
+}
+
+function loadStoredParameters(): Partial<StoredParameters> | null {
+    try {
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : null;
+    } catch {
+        return null;
+    }
+}
+
+function normalizeCombinationCount(value: unknown): number {
+    const count = Math.floor(Number(value));
+    return Number.isFinite(count)
+        ? Math.max(1, Math.min(50, count))
+        : DEFAULT_COMBINATION_COUNT;
+}
+
+function sanitizeNumbers(value: unknown, max: number, limit = Infinity): number[] {
+    if (!Array.isArray(value)) return [];
+
+    return [
+        ...new Set(
+            value.filter(
+                (number): number is number =>
+                    typeof number === "number" &&
+                    Number.isInteger(number) &&
+                    number >= 1 &&
+                    number <= max
+            )
+        ),
+    ].slice(0, limit);
+}
+
+const storedParameters = loadStoredParameters();
+const initialLottery =
+    findLotteryOption(storedParameters?.selectedLotteryKey) ?? defaultLottery;
+const initialIncludeNumbers = sanitizeNumbers(
+    storedParameters?.includeNumbers,
+    initialLottery.max_number,
+    initialLottery.number_of_digits
+);
+const initialExcludeNumbers = sanitizeNumbers(
+    storedParameters?.excludeNumbers,
+    initialLottery.max_number
+).filter((number) => !initialIncludeNumbers.includes(number));
+const initialAtleastNumbers = sanitizeNumbers(
+    storedParameters?.atleastHasNumbers,
+    initialLottery.max_number
+).filter(
+    (number) =>
+        !initialIncludeNumbers.includes(number) &&
+        !initialExcludeNumbers.includes(number)
+);
 
 const includeModalRef = ref<InstanceType<typeof NumberModal> | null>(null);
 const excludeModalRef = ref<InstanceType<typeof NumberModal> | null>(null);
 const atleastModalRef = ref<InstanceType<typeof NumberModal> | null>(null);
 
-const numberOfCombinations = ref(6);
-const toMaxNumber = ref(58);
-const numberToGenerate = ref(4);
+const selectedLottery = ref(initialLottery);
+const numberOfCombinations = ref(initialLottery.number_of_digits);
+const toMaxNumber = ref(initialLottery.max_number);
+const numberToGenerate = ref(
+    normalizeCombinationCount(storedParameters?.numberToGenerate)
+);
 const generatedNumbers = ref<Array<number[]>>([]);
-const includeNumbers = ref<number[]>([]);
-const excludeNumbers = ref<number[]>([]);
-const atleastHasNumbers = ref<number[]>([]);
+const includeNumbers = ref<number[]>(initialIncludeNumbers);
+const excludeNumbers = ref<number[]>(initialExcludeNumbers);
+const atleastHasNumbers = ref<number[]>(initialAtleastNumbers);
 const copiedIndex = ref<number | null>(null);
 const resultsRef = ref<HTMLElement | null>(null);
 const actionsRef = ref<HTMLElement | null>(null);
@@ -40,14 +107,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => actionsObserver?.disconnect());
 
-const selectedLottery = ref({
-    label: "Ultra Lotto 6/58",
-    key: "ultra_lotto_6_58",
-    img: UltraLotto658,
-    number_of_digits: 6,
-    max_number: 58,
-});
-
 watch(
     () => selectedLottery.value,
     (newVal) => {
@@ -61,14 +120,37 @@ watch(
     { deep: true }
 );
 
+watch(
+    [
+        () => selectedLottery.value.key,
+        numberToGenerate,
+        includeNumbers,
+        excludeNumbers,
+        atleastHasNumbers,
+    ],
+    () => {
+        try {
+            const parameters: StoredParameters = {
+                selectedLotteryKey: selectedLottery.value.key,
+                numberToGenerate: normalizeCombinationCount(numberToGenerate.value),
+                includeNumbers: includeNumbers.value,
+                excludeNumbers: excludeNumbers.value,
+                atleastHasNumbers: atleastHasNumbers.value,
+            };
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(parameters));
+        } catch {
+            // Storage can be unavailable in private browsing or restricted contexts.
+        }
+    },
+    { deep: true, flush: "post" }
+);
+
 function pad(n: number) {
     return n < 10 ? `0${n}` : `${n}`;
 }
 
 function clampCount() {
-    let v = Math.floor(Number(numberToGenerate.value) || 1);
-    v = Math.max(1, Math.min(50, v));
-    numberToGenerate.value = v;
+    numberToGenerate.value = normalizeCombinationCount(numberToGenerate.value);
 }
 
 function stepCount(delta: number) {
@@ -103,7 +185,7 @@ function resetAll() {
     includeNumbers.value = [];
     excludeNumbers.value = [];
     atleastHasNumbers.value = [];
-    numberToGenerate.value = 4;
+    numberToGenerate.value = DEFAULT_COMBINATION_COUNT;
 }
 
 function combinationToString(combination: number[]) {

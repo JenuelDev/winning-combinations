@@ -46,31 +46,36 @@ export function generateWinningCombination(
     const result = [...include];
 
     // Candidate pool = 1..maxNumber, minus excluded and already-included numbers.
-    let pool = Array.from({ length: maxNumber }, (_, i) => i + 1)
+    const pool = Array.from({ length: maxNumber }, (_, i) => i + 1)
         .filter(num => !exclude.includes(num) && !include.includes(num));
 
-    // Fisher–Yates shuffle with secure random.
-    for (let i = pool.length - 1; i > 0; i--) {
-        const j = secureRandomInt(0, i + 1);
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-
-    // Guarantee "at least one of these" — but only while a slot is still free.
-    // If `include` already fills the combination the guarantee is unsatisfiable,
-    // so we leave the result as-is instead of overflowing the draw size.
+    // Repeat a complete secure shuffle when the "at least one" rule is active.
+    // Rejection sampling keeps every valid combination equally likely. Selecting
+    // one required number first would bias results toward combinations containing
+    // several numbers from the required list.
     const alreadySatisfied = result.some(num => hasAtLeastOneOfThisNumbers.includes(num));
-    // `pool` already excludes excluded/included numbers, so membership is enough.
     const availableFromHasList = hasAtLeastOneOfThisNumbers.filter(num => pool.includes(num));
+    const slotsToFill = numbersPerCombination - result.length;
+    const mustSatisfyAtLeastOne =
+        !alreadySatisfied && availableFromHasList.length > 0 && slotsToFill > 0;
+    let shuffledPool: number[];
 
-    if (!alreadySatisfied && availableFromHasList.length > 0 && result.length < numbersPerCombination) {
-        const chosen = availableFromHasList[secureRandomInt(0, availableFromHasList.length)];
-        result.push(chosen);
-        pool = pool.filter(num => num !== chosen);
-    }
+    do {
+        shuffledPool = [...pool];
+        for (let i = shuffledPool.length - 1; i > 0; i--) {
+            const j = secureRandomInt(0, i + 1);
+            [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+        }
+    } while (
+        mustSatisfyAtLeastOne &&
+        !shuffledPool
+            .slice(-slotsToFill)
+            .some(num => availableFromHasList.includes(num))
+    );
 
     // Fill the remaining slots from the shuffled pool.
-    while (result.length < numbersPerCombination && pool.length > 0) {
-        result.push(pool.pop()!);
+    while (result.length < numbersPerCombination && shuffledPool.length > 0) {
+        result.push(shuffledPool.pop()!);
     }
 
     return result.sort((a, b) => a - b);
